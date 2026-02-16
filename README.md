@@ -41,4 +41,4 @@
 
 ## 演示封面
 
-![flos_cover 演示图](flos_cover.png)
+![flos_cover 演示图](static/outputs/flos_cover.png)
