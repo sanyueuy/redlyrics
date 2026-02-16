@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>歌词赏析智能体 Web UI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <h1>歌词赏析智能体</h1>
+        <p>输入歌名 / 歌手 / 歌词，一键生成小红书文案与封面背景图。</p>
+      </header>
+
+      <section class="card">
+        <form method="post" class="form">
+          <input type="hidden" name="analysis_text" value="{{ analysis_text }}" />
+          <input type="hidden" name="song_name" value="{{ song_name }}" />
+          <input type="hidden" name="artist" value="{{ artist }}" />
+          <input type="hidden" name="prompt_a" value="{{ prompt_a }}" />
+          <input type="hidden" name="prompt_b" value="{{ prompt_b }}" />
+          <input type="hidden" name="prompt_c" value="{{ prompt_c }}" />
+          <input type="hidden" name="image_a_path" value="{{ image_a_path }}" />
+          <input type="hidden" name="image_b_path" value="{{ image_b_path }}" />
+          <input type="hidden" name="image_c_path" value="{{ image_c_path }}" />
+          <div class="row">
+            <div class="field">
+              <label for="analysis_model">赏析模型</label>
+              <select id="analysis_model" name="analysis_model">
+                {% for m in analysis_models %}
+                <option value="{{ m }}" {% if m == analysis_model %}selected{% endif %}>{{ m }}</option>
+                {% endfor %}
+              </select>
+              <div class="hint">含 * 的模型需把 * 改成预算数字，例如 thinking-64。</div>
+            </div>
+            <div class="field">
+              <label for="prompt_model">提示词模型</label>
+              <select id="prompt_model" name="prompt_model">
+                {% for m in prompt_models %}
+                <option value="{{ m }}" {% if m == prompt_model %}selected{% endif %}>{{ m }}</option>
+                {% endfor %}
+              </select>
+              <div class="hint">含 * 的模型需把 * 改成预算数字，例如 thinking-64。</div>
+            </div>
+            <div class="field">
+              <label for="image_model">出图模型</label>
+              <select id="image_model" name="image_model">
+                {% for m in image_models %}
+                <option value="{{ m }}" {% if m == image_model %}selected{% endif %}>{{ m }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <label for="raw_content">歌曲信息</label>
+          <textarea id="raw_content" name="raw_content" rows="12" placeholder="请粘贴包含歌名、歌手、歌词的完整内容">{{ raw_content }}</textarea>
+          <div class="actions">
+            <button type="submit" name="action" value="analyze">生成赏析</button>
+            <button type="submit" name="action" value="generate_prompts">生成提示词</button>
+            <button type="submit" name="action" value="generate_images">生成三张图</button>
+          </div>
+        </form>
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+      </section>
+
+      {% if analysis_text %}
+      <section class="grid">
+        <div class="card">
+          <h2>识别信息</h2>
+          <div class="meta">歌名：{{ song_name }}</div>
+          <div class="meta">歌手：{{ artist }}</div>
+        </div>
+        <div class="card">
+          <h2>版权声明</h2>
+          <p class="disclaimer">{{ disclaimer }}</p>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="card">
+          <h2>小红书文案</h2>
+          <pre class="output">{{ analysis_text }}</pre>
+        </div>
+        <div class="card">
+          <h2>封面背景提示词</h2>
+          <div class="prompt-grid">
+            <div class="prompt-item">
+              <div class="prompt-head">Prompt A</div>
+              <textarea name="prompt_a" form="prompt-form" rows="6">{{ prompt_a }}</textarea>
+              <div class="inline-actions">
+                <button type="submit" form="prompt-form" name="action" value="regenerate_a">重生成A图</button>
+                <button type="button" class="copy-btn" data-copy="prompt_a">复制</button>
+              </div>
+            </div>
+            <div class="prompt-item">
+              <div class="prompt-head">Prompt B</div>
+              <textarea name="prompt_b" form="prompt-form" rows="6">{{ prompt_b }}</textarea>
+              <div class="inline-actions">
+                <button type="submit" form="prompt-form" name="action" value="regenerate_b">重生成B图</button>
+                <button type="button" class="copy-btn" data-copy="prompt_b">复制</button>
+              </div>
+            </div>
+            <div class="prompt-item">
+              <div class="prompt-head">Prompt C</div>
+              <textarea name="prompt_c" form="prompt-form" rows="6">{{ prompt_c }}</textarea>
+              <div class="inline-actions">
+                <button type="submit" form="prompt-form" name="action" value="regenerate_c">重生成C图</button>
+                <button type="button" class="copy-btn" data-copy="prompt_c">复制</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>生成封面图</h2>
+        {% if images and images|length > 0 %}
+        <div class="gallery">
+          {% for item in images %}
+          <div class="thumb">
+            {% if item.image_path %}
+            <img class="cover" src="{{ url_for('static', filename=item.image_path) }}" alt="cover image" />
+            {% else %}
+            <div class="placeholder">图片生成失败</div>
+            {% endif %}
+            {% if item.prompt %}
+            <pre class="output mini">{{ item.prompt }}</pre>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="muted">暂未生成图片。</p>
+        {% endif %}
+      </section>
+      <form id="prompt-form" method="post" class="hidden-form">
+        <input type="hidden" name="raw_content" value="{{ raw_content }}" />
+        <input type="hidden" name="analysis_text" value="{{ analysis_text }}" />
+        <input type="hidden" name="song_name" value="{{ song_name }}" />
+        <input type="hidden" name="artist" value="{{ artist }}" />
+        <input type="hidden" name="analysis_model" value="{{ analysis_model }}" />
+        <input type="hidden" name="prompt_model" value="{{ prompt_model }}" />
+        <input type="hidden" name="image_model" value="{{ image_model }}" />
+        <input type="hidden" name="image_a_path" value="{{ image_a_path }}" />
+        <input type="hidden" name="image_b_path" value="{{ image_b_path }}" />
+        <input type="hidden" name="image_c_path" value="{{ image_c_path }}" />
+      </form>
+      {% endif %}
+    </div>
+    <script>
+      const buttons = document.querySelectorAll(".copy-btn");
+      buttons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const name = btn.getAttribute("data-copy");
+          const area = document.querySelector(`textarea[name="${name}"]`);
+          if (area) {
+            area.select();
+            document.execCommand("copy");
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
