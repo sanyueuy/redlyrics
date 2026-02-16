@@ -6,7 +6,7 @@
 
 1.  **深度赏析 (Gemini-3-Pro)**: 扮演资深乐评人，生成包含意象分析、修辞解读、情感基调的小红书爆款文案。
 2.  **自动排版**: 自动生成标题、Emoji、列表和 Hashtags。
-3.  **视觉创作 (Gemini + Nano-Banana)**: 
+3.  **视觉创作 (Gemini + Nano-Banana)**:
     - 自动构思符合“Dark Academia/王家卫”风格的封面提示词。
     - 智能提取歌名与金句，生成带排版加字指令的 Prompt。
 4.  **一键生图**: 直接调用绘图模型生成并保存高清封面图。
@@ -39,7 +39,6 @@
 - python-dotenv
 - requests
 
-## ��ʾ����
+## 演示封面
 
-![flos_cover ��ʾͼ](flos_cover.png)
-
+![flos_cover 演示图](flos_cover.png)
