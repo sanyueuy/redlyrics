@@ -38,3 +38,8 @@
 - openai
 - python-dotenv
 - requests
+
+## ÑÝÊ¾·âÃæ
+
+![flos_cover ÑÝÊ¾Í¼](flos_cover.png)
+
